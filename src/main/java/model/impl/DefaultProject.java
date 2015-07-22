@@ -5,7 +5,6 @@ import java.io.IOException;
 import model.Branch;
 import model.Directory;
 import model.Project;
-import model.SVNLocations;
 import exceptions.BuildFailureException;
 import exceptions.CantRemoveException;
 import exceptions.CantSVNChecoutException;
@@ -15,14 +14,22 @@ public class DefaultProject implements Project {
 
 	private String name;
 	private Branch currentBranch;
-	private SVNLocations svnLocations;
+	private Branch parentMergeBranch;
+	
 	private Directory directory;
+	
+	
+	
+
+	public DefaultProject(final String name, final String branch, final String previousBranch, final String svnBase) {
+		this.name = name;
+	}
 
 	public void svnupdate() throws CantSVNUpdateException {
 		try {
 			Runtime.getRuntime().exec(
 					new String[] { "cd " + directory.getBase(),
-							"svn co " + getSVNLocationCurrent() + " " + directory.getName() });
+							"svn update " });
 		} catch (IOException e) {
 			throw new CantSVNUpdateException(this, e.getMessage());
 		}
@@ -30,7 +37,13 @@ public class DefaultProject implements Project {
 	}
 
 	public void svncheckout() throws CantSVNChecoutException {
-		// TODO Auto-generated method stub
+		try {
+			Runtime.getRuntime().exec(
+					new String[] { "cd " + directory.getBase(),
+							"svn co " + getSVNLocationCurrent() + " " + directory.getName() });
+		} catch (IOException e) {
+			throw new CantSVNChecoutException(this, e.getMessage());
+		}
 
 	}
 
@@ -72,11 +85,11 @@ public class DefaultProject implements Project {
 	}
 
 	public String getSVNLocationCurrent() {
-		return svnLocations.getCurrent();
+		return currentBranch.getSVNAddress();
 	}
 
 	public String getSVNLocationParent() {
-		return svnLocations.getParent();
+		return parentMergeBranch.getSVNAddress();
 	}
 
 	public String getDirectory() {
@@ -100,3 +113,4 @@ public class DefaultProject implements Project {
 	}
 
 }
+ 
